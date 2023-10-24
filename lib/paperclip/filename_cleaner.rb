@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Paperclip
   class FilenameCleaner
     def initialize(invalid_character_regex)

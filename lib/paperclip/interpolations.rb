@@ -5,7 +5,6 @@ module Paperclip
   # Paperclip.interpolates method.
   module Interpolations
     extend self
-    ID_PARTITION_LIMIT = 1_000_000_000
 
     # Hash assignment of interpolations. Included only for compatibility,
     # and is not intended for normal use.
@@ -176,11 +175,7 @@ module Paperclip
     def id_partition attachment, style_name
       case id = attachment.instance.id
       when Integer
-        if id < ID_PARTITION_LIMIT
-          ("%09d".freeze % id).scan(/\d{3}/).join("/".freeze)
-        else
-          ("%012d".freeze % id).scan(/\d{3}/).join("/".freeze)
-        end
+        ("%09d".freeze % id).scan(/\d{3}/).join("/".freeze)
       when String
         id.scan(/.{3}/).first(3).join("/".freeze)
       else

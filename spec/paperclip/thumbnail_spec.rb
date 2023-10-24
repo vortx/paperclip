@@ -179,12 +179,10 @@ describe Paperclip::Thumbnail do
         end
 
         it "errors when trying to create the thumbnail" do
-          silence_stream(STDERR) do
-            expect {
+          assert_raises(Paperclip::Error) do
+            silence_stream(STDERR) do
               @thumb.make
-            }.to raise_error(
-              Paperclip::Error, /unrecognized option `-this-aint-no-option'/
-            )
+            end
           end
         end
 

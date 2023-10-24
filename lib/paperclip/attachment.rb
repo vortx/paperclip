@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'uri'
 require 'paperclip/url_generator'
 require 'active_support/deprecation'
@@ -337,15 +338,8 @@ module Paperclip
     # inconsistencies in timing of S3 commands. It's possible that calling
     # #reprocess! will lose data if the files are not kept.
     def reprocess!(*style_args)
-      saved_flags = @options.slice(
-        :only_process,
-        :preserve_files,
-        :check_validity_before_processing
-      )
-      @options[:only_process] = style_args
-      @options[:preserve_files] = true
-      @options[:check_validity_before_processing] = false
-
+      saved_only_process, @options[:only_process] = @options[:only_process], style_args
+      saved_preserve_files, @options[:preserve_files] = @options[:preserve_files], true
       begin
         assign(self)
         save
@@ -354,7 +348,8 @@ module Paperclip
         warn "#{e} - skipping file."
         false
       ensure
-        @options.merge!(saved_flags)
+        @options[:only_process] = saved_only_process
+        @options[:preserve_files] = saved_preserve_files
       end
     end
 
@@ -537,10 +532,6 @@ module Paperclip
           reduce(original) do |file, processor|
           file = Paperclip.processor(processor).make(file, style.processor_options, self)
           intermediate_files << file unless file == @queued_for_write[:original]
-          # if we're processing the original, close + unlink the source tempfile
-          if name == :original
-            @queued_for_write[:original].close(true)
-          end
           file
         end
 
@@ -600,11 +591,7 @@ module Paperclip
     def unlink_files(files)
       Array(files).each do |file|
         file.close unless file.closed?
-
-        begin
-          file.unlink if file.respond_to?(:unlink)
-        rescue Errno::ENOENT
-        end
+        file.unlink if file.respond_to?(:unlink) && file.path.present? && File.exist?(file.path)
       end
     end
 

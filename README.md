@@ -1,39 +1,6 @@
 Paperclip
 =========
 
-# Deprecated
-
-**[Paperclip is deprecated]**.
-
-For new projects, we recommend Rails' own [ActiveStorage].
-
-For existing projects, please consult and contribute to the migration guide,
-available [in English], [en español], and as [a video] recorded at RailsConf
-2019. You may also prefer [an alternative migration tutorial used by
-Doorkeeper][].
-
-Alternatively, for existing projects, [Kreeti] is maintaining [kt-paperclip],
-an ongoing [fork of Paperclip].
-
-We will leave the Issues open as a discussion forum _only_. We do _not_
-guarantee a response from us in the Issues. All bug reports should go to
-kt-paperclip.
-
-We are no longer accepting pull requests _except_ pull requests against the
-migration guide. All other pull requests will be closed without merging.
-
-[Paperclip is deprecated]: https://robots.thoughtbot.com/closing-the-trombone
-[ActiveStorage]: http://guides.rubyonrails.org/active_storage_overview.html
-[in English]: https://github.com/thoughtbot/paperclip/blob/master/MIGRATING.md
-[en español]: https://github.com/thoughtbot/paperclip/blob/master/MIGRATING-ES.md
-[a video]: https://www.youtube.com/watch?v=tZ_WNUytO9o
-[Kreeti]: https://www.kreeti.com/
-[kt-paperclip]: https://rubygems.org/gems/kt-paperclip
-[fork of Paperclip]: https://github.com/kreeti/kt-paperclip
-[an alternative migration tutorial used by Doorkeeper]: https://www.tokyodev.com/2021/03/23/paperclip-activestorage/
-
-# Existing documentation
-
 ## Documentation valid for `master` branch
 
 Please check the documentation for the paperclip version you are using:
@@ -200,7 +167,7 @@ Paperclip is distributed as a gem, which is how it should be used in your app.
 Include the gem in your Gemfile:
 
 ```ruby
-gem "paperclip", "~> 6.0.0"
+gem "paperclip", "~> 5.2.1"
 ```
 
 Or, if you want to get the latest, you can get master from the main paperclip repository:
@@ -374,7 +341,7 @@ Lastly, you can also define multiple validations on a single attachment using `v
 
 ```ruby
 validates_attachment :avatar, presence: true,
-  content_type: "image/jpeg",
+  content_type: { content_type: "image/jpeg" },
   size: { in: 0..10.kilobytes }
 ```
 
@@ -401,7 +368,7 @@ afterwards, then assign manually:
 ```ruby
 class Book < ActiveRecord::Base
   has_attached_file :document, styles: { thumbnail: "60x60#" }
-  validates_attachment :document, content_type: "application/pdf"
+  validates_attachment :document, content_type: { content_type: "application/pdf" }
   validates_something_else # Other validations that conflict with Paperclip's
 end
 
@@ -433,7 +400,7 @@ image-y ones:
 
 ```ruby
 validates_attachment :avatar,
-  content_type: ["image/jpeg", "image/gif", "image/png"]
+  content_type: { content_type: ["image/jpeg", "image/gif", "image/png"] }
 ```
 
 `Paperclip::ContentTypeDetector` will attempt to match a file's extension to an

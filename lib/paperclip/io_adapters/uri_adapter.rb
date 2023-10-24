@@ -28,17 +28,15 @@ module Paperclip
     end
 
     def content_type_from_content
-      @content.meta["content-type"].presence
+      if @content.respond_to?(:content_type)
+        @content.content_type
+      end
     end
 
     def filename_from_content_disposition
-      if @content.meta.key?("content-disposition") && @content.meta["content-disposition"].match(/filename/i)
-        # can include both filename and filename* values according to RCF6266. filename should come first
-        _, filename = @content.meta["content-disposition"].split(/filename\*?\s*=\s*/i)
-
-        # filename can be enclosed in quotes or not
-        matches = filename.match(/"(.*)"/)
-        matches ? matches[1] : filename.split(';')[0]
+      if @content.meta.key?("content-disposition")
+        matches = @content.meta["content-disposition"].match(/filename="([^"]*)"/)
+        matches[1] if matches
       end
     end
 

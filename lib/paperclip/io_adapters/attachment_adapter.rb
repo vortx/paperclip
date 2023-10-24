@@ -31,13 +31,7 @@ module Paperclip
       if source.staged?
         link_or_copy_file(source.staged_path(@style), destination.path)
       else
-        begin
-          source.copy_to_local_file(@style, destination.path)
-        rescue Errno::EACCES
-          # clean up lingering tempfile if we cannot access source file
-          destination.close(true)
-          raise
-        end
+        source.copy_to_local_file(@style, destination.path)
       end
       destination
     end

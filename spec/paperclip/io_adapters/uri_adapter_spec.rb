@@ -16,8 +16,6 @@ describe Paperclip::UriAdapter do
   end
 
   context "a new instance" do
-    let(:meta) { { "content-type" => "image/png" } }
-
     before do
       Paperclip::UriAdapter.any_instance.
         stubs(:download_content).returns(@open_return)
@@ -64,7 +62,7 @@ describe Paperclip::UriAdapter do
       assert_equal 'image/png', @subject.content_type
     end
 
-    it "accepts an original_filename" do
+    it 'accepts an orgiginal_filename' do
       @subject.original_filename = 'image.png'
       assert_equal 'image.png', @subject.original_filename
     end
@@ -73,7 +71,6 @@ describe Paperclip::UriAdapter do
 
   context "a directory index url" do
     let(:content_type) { "text/html" }
-    let(:meta) { { "content-type" => "text/html" } }
 
     before do
       Paperclip::UriAdapter.any_instance.
@@ -108,67 +105,22 @@ describe Paperclip::UriAdapter do
 
   context "a url with content disposition headers" do
     let(:file_name) { "test_document.pdf" }
-    let(:filename_from_path) { "paperclip" }
+    let(:meta) do
+      {
+        "content-disposition" => "attachment; filename=\"#{file_name}\";",
+      }
+    end
 
     before do
       Paperclip::UriAdapter.any_instance.
         stubs(:download_content).returns(@open_return)
 
-      @uri = URI.parse(
-        "https://github.com/thoughtbot/#{filename_from_path}?file=test")
+      @uri = URI.parse("https://github.com/thoughtbot/paperclip?file=test")
+      @subject = Paperclip.io_adapters.for(@uri)
     end
 
-    it "returns file name from path" do
-      meta["content-disposition"] = "inline;"
-
-      @subject = Paperclip.io_adapters.for(@uri)
-
-      assert_equal filename_from_path, @subject.original_filename
-    end
-
-    it "returns a file name enclosed in double quotes" do
-      file_name = "john's test document.pdf"
-      meta["content-disposition"] = "attachment; filename=\"#{file_name}\";"
-
-      @subject = Paperclip.io_adapters.for(@uri)
-
+    it "returns a file name" do
       assert_equal file_name, @subject.original_filename
-    end
-
-    it "returns a file name not enclosed in double quotes" do
-      meta["content-disposition"] = "ATTACHMENT; FILENAME=#{file_name};"
-
-      @subject = Paperclip.io_adapters.for(@uri)
-
-      assert_equal file_name, @subject.original_filename
-    end
-
-    it "does not crash when an empty filename is given" do
-      meta["content-disposition"] = "ATTACHMENT; FILENAME=\"\";"
-
-      @subject = Paperclip.io_adapters.for(@uri)
-
-      assert_equal "", @subject.original_filename
-    end
-
-    it "returns a file name ignoring RFC 5987 encoding" do
-      meta["content-disposition"] =
-        "attachment; filename=#{file_name}; filename* = utf-8''%e2%82%ac%20rates"
-
-      @subject = Paperclip.io_adapters.for(@uri)
-
-      assert_equal file_name, @subject.original_filename
-    end
-
-    context "when file name has consecutive periods" do
-      let(:file_name) { "test_document..pdf" }
-
-      it "returns a file name" do
-        @uri = URI.parse(
-          "https://github.com/thoughtbot/#{file_name}?file=test")
-        @subject = Paperclip.io_adapters.for(@uri)
-        assert_equal file_name, @subject.original_filename
-      end
     end
   end
 
